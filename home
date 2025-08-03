@@ -51,44 +51,38 @@ export default function HomePage() {
         transition={{ duration: 0.5, delay: 0.2 }}
         className="w-full max-w-md mx-auto"
       >
-        <h2 className="text-3xl md:text-4xl font-bold mb-6">
-          Ready to Meet Someone New?
-        </h2>
+        <h2 className="text-3xl md:text-4xl font-bold m<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Omengles - Random Video Chat</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Omengles</h1>
+    <p>Connect instantly with strangers worldwide</p>
+  </header>
 
-        <Link to={createPageUrl('Chat')}>
-          <Button
-            className="w-full max-w-xs h-14 bg-[#D92128] hover:bg-red-700 text-white text-xl font-bold rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300"
-          >
-            Start
-          </Button>
-        </Link>
-
-        <div className="my-12">
-          <h3 className="text-xl font-bold mb-6 text-gray-200">How It Works</h3>
-          <div className="flex justify-center items-center gap-8 md:gap-16">
-            <HowItWorksItem icon={Wifi} text="Connect" />
-            <HowItWorksItem icon={Video} text="Chat" />
-            <HowItWorksItem icon={RefreshCw} text="Repeat" />
-          </div>
-        </div>
-
-        <div className="text-xs text-gray-500 max-w-sm mx-auto flex items-start gap-2 p-3 bg-black/20 rounded-lg">
-          <AlertTriangle className="w-6 h-6 text-gray-500 flex-shrink-0" />
-          <p>
-            By using the service, you agree to abide by our terms of use. Keep your conversations anonymous and respectful.
-          </p>
-        </div>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 0.5 }}
-        className="absolute bottom-6 flex items-center gap-2 text-green-400 font-semibold"
-      >
-        <CheckCircle className="w-5 h-5" />
-        <span>{onlineCount} people online now</span>
-      </motion.div>
+  <main>
+    <div class="video-container">
+      <video id="localVideo" autoplay muted></video>
+      <video id="remoteVideo" autoplay></video>
     </div>
-  );
+
+    <div class="controls">
+      <button id="startBtn">Start Chat</button>
+      <button id="stopBtn" disabled>Stop Chat</button>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Omengles. All rights reserved.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
 }
