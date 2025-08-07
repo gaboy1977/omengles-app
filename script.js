@@ -1,156 +1,101 @@
-let localStream;
-let remoteStream;
-let peerConnection;
-let ws;
-let isCaller = false;
+const localVideo = document.getElementById("localVideo");
+const remoteVideo = document.getElementById("remoteVideo");
+const chatBox = document.getElementById("chatBox");
+const chatInput = document.getElementById("chatInput");
+const sendBtn = document.getElementById("sendBtn");
+const nextBtn = document.getElementById("nextBtn");
+const stopBtn = document.getElementById("stopBtn");
 
-const config = {
-  iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+let localStream;
+let peerConnection;
+let socket;
+let roomId;
+
+const servers = {
+  iceServers: [
+    { urls: "stun:stun.l.google.com:19302" }
+  ]
 };
 
-function startChat() {
-  document.getElementById("landing").classList.add("hidden");
-  document.getElementById("chat-interface").classList.remove("hidden");
-
-  navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
-    localStream = stream;
-    document.getElementById("localVideo").srcObject = stream;
-
-    ws = new WebSocket("ws://localhost:3000");
-
-    ws.onopen = () => {
-      ws.send(JSON.stringify({ type: "join" }));
-    };
-
-    ws.onmessage = async (msg) => {
-      const data = JSON.parse(msg.data);
-
-      switch (data.type) {
-        case "match":
-          setupWebRTC(true);
-          break;
-        case "offer":
-          await setupWebRTC(false);
-          await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
-          const answer = await peerConnection.createAnswer();
-          await peerConnection.setLocalDescription(answer);
-          ws.send(JSON.stringify({ type: "answer", answer }));
-          break;
-        case "answer":
-          await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
-          break;
-        case "candidate":
-          if (peerConnection) {
-            peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-          }
-          break;
-        case "leave":
-          endCall();
-          break;
-      }
-    };
-  });
+function log(msg) {
+  chatBox.innerHTML += `<div>${msg}</div>`;
+  chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-async function setupWebRTC(initiator) {
-  isCaller = initiator;
-  remoteStream = new MediaStream();
-  document.getElementById("remoteVideo").srcObject = remoteStream;
+function startConnection() {
+  socket = new WebSocket("ws://localhost:3000");
 
-  peerConnection = new RTCPeerConnection(config);
+  socket.onopen = () => {
+    socket.send(JSON.stringify({ type: "join" }));
+  };
+
+  socket.onmessage = async (message) => {
+    const data = JSON.parse(message.data);
+
+    switch (data.type) {
+      case "offer":
+        await createPeer(false);
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        socket.send(JSON.stringify({ type: "answer", answer }));
+        break;
+      case "answer":
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+        break;
+      case "candidate":
+        if (peerConnection) {
+          peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+        }
+        break;
+    }
+  };
+}
+
+async function createPeer(isCaller) {
+  peerConnection = new RTCPeerConnection(servers);
+
+  peerConnection.ontrack = (event) => {
+    remoteVideo.srcObject = event.streams[0];
+  };
 
   peerConnection.onicecandidate = (event) => {
     if (event.candidate) {
-      ws.send(JSON.stringify({ type: "candidate", candidate: event.candidate }));
+      socket.send(JSON.stringify({ type: "candidate", candidate: event.candidate }));
     }
   };
 
-  peerConnection.ontrack = (event) => {
-    event.streams[0].getTracks().forEach((track) => {
-      remoteStream.addTrack(track);
-    });
-  };
+  localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+  localVideo.srcObject = localStream;
 
-  localStream.getTracks().forEach((track) => {
+  localStream.getTracks().forEach(track => {
     peerConnection.addTrack(track, localStream);
   });
 
-  if (initiator) {
+  if (isCaller) {
     const offer = await peerConnection.createOffer();
     await peerConnection.setLocalDescription(offer);
-    ws.send(JSON.stringify({ type: "offer", offer }));
+    socket.send(JSON.stringify({ type: "offer", offer }));
   }
 }
 
-function endCall() {
-  if (peerConnection) {
-    peerConnection.close();
-    peerConnection = null;
+sendBtn.onclick = () => {
+  const msg = chatInput.value.trim();
+  if (msg !== "") {
+    log(`<strong>You:</strong> ${msg}`);
+    socket.send(JSON.stringify({ type: "chat", message: msg }));
+    chatInput.value = "";
   }
+};
 
-  if (remoteStream) {
-    remoteStream.getTracks().forEach(track => track.stop());
-    remoteStream = null;
-  }
+nextBtn.onclick = () => {
+  location.reload(); // quick and dirty way to restart the connection
+};
 
-  if (localStream) {
-    localStream.getTracks().forEach(track => track.stop());
-    localStream = null;
-  }
+stopBtn.onclick = () => {
+  if (peerConnection) peerConnection.close();
+  if (socket) socket.close();
+  log("Chat ended.");
+};
 
-  document.getElementById("remoteVideo").srcObject = null;
-  document.getElementById("localVideo").srcObject = null;
-}
-
-function nextChat() {
-  if (ws) {
-    ws.send(JSON.stringify({ type: "leave" }));
-  }
-  endCall();
-  rejoin();
-}
-
-function rejoin() {
-  navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
-    localStream = stream;
-    document.getElementById("localVideo").srcObject = stream;
-
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({ type: "join" }));
-    } else {
-      ws = new WebSocket("ws://localhost:3000");
-
-      ws.onopen = () => {
-        ws.send(JSON.stringify({ type: "join" }));
-      };
-
-      ws.onmessage = async (msg) => {
-        const data = JSON.parse(msg.data);
-
-        switch (data.type) {
-          case "match":
-            setupWebRTC(true);
-            break;
-          case "offer":
-            await setupWebRTC(false);
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
-            const answer = await peerConnection.createAnswer();
-            await peerConnection.setLocalDescription(answer);
-            ws.send(JSON.stringify({ type: "answer", answer }));
-            break;
-          case "answer":
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
-            break;
-          case "candidate":
-            if (peerConnection) {
-              peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-            }
-            break;
-          case "leave":
-            endCall();
-            break;
-        }
-      };
-    }
-  });
-}
+startConnection();
