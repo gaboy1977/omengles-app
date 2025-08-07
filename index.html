@@ -2,55 +2,42 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Omengles</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Omengles - Live Video Chat</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div id="landing" class="container">
-    <div class="logo">
-      <span class="logo-circle">O</span>
-      <span class="logo-text">OMENGLES</span><span class="com">COM</span>
+  <header>
+    <div class="logo-container">
+      <img src="logo.png" alt="Omengles Logo" class="logo">
+    </div>
+    <h1>Omengles</h1>
+    <p>Connect instantly with strangers worldwide</p>
+  </header>
+
+  <main>
+    <div class="video-section">
+      <video id="localVideo" autoplay muted playsinline></video>
+      <video id="remoteVideo" autoplay playsinline></video>
     </div>
 
-    <h2 class="main-text">Ready to Meet<br />Someone New?</h2>
-
-    <button class="start-btn" onclick="startChat()">Start</button>
-
-    <div class="how-it-works">
-      <h3>How It Works</h3>
-      <div class="steps">
-        <div class="step">
-          <div class="icon">📡</div>
-          <p>Connect</p>
-        </div>
-        <div class="step">
-          <div class="icon">🎥</div>
-          <p>Chat</p>
-        </div>
-        <div class="step">
-          <div class="icon">🔁</div>
-          <p>Repeat</p>
-        </div>
+    <div class="chat-section">
+      <div id="chatBox" class="chat-box"></div>
+      <div class="chat-input-container">
+        <input type="text" id="chatInput" placeholder="Type your message here...">
+        <button id="sendBtn">Send</button>
       </div>
     </div>
 
-    <p class="disclaimer">
-      ⚠️ By using the service, you agree to abide by our terms of use.<br />
-      Keep your conversations anonymous and respectful.
-    </p>
-
-    <p class="online">✅ <span id="online-count">212</span> people online now</p>
-  </div>
-
-  <div id="chat-interface" class="hidden">
-    <video id="localVideo" autoplay muted playsinline></video>
-    <video id="remoteVideo" autoplay playsinline></video>
-    <div class="chat-controls">
-      <button onclick="nextChat()">Next</button>
-      <button onclick="endCall()">End Chat</button>
+    <div class="controls">
+      <button id="nextBtn">Next</button>
+      <button id="stopBtn">Stop</button>
     </div>
-  </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Omengles. All rights reserved.</p>
+  </footer>
 
   <script src="script.js"></script>
 </body>
