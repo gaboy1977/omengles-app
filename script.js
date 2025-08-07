@@ -8,53 +8,52 @@ const config = {
   iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
 };
 
-function startApp() {
-  const username = document.getElementById('username').value;
-  if (!username) return alert("Enter a name");
+function startChat() {
+  document.getElementById("landing").classList.add("hidden");
+  document.getElementById("chat-interface").classList.remove("hidden");
 
-  document.getElementById("login-container").style.display = "none";
-  document.getElementById("video-chat-container").style.display = "block";
+  navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
+    localStream = stream;
+    document.getElementById("localVideo").srcObject = stream;
 
-  ws = new WebSocket("ws://localhost:3000");
+    ws = new WebSocket("ws://localhost:3000");
 
-  ws.onopen = () => {
-    ws.send(JSON.stringify({ type: "login", name: username }));
-  };
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ type: "join" }));
+    };
 
-  ws.onmessage = async (message) => {
-    const data = JSON.parse(message.data);
+    ws.onmessage = async (msg) => {
+      const data = JSON.parse(msg.data);
 
-    switch (data.type) {
-      case "match":
-        setupWebRTC();
-        break;
-      case "offer":
-        await setupWebRTC(false);
-        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
-        const answer = await peerConnection.createAnswer();
-        await peerConnection.setLocalDescription(answer);
-        ws.send(JSON.stringify({ type: "answer", answer }));
-        break;
-      case "answer":
-        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
-        break;
-      case "candidate":
-        if (peerConnection) {
-          peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-        }
-        break;
-      case "leave":
-        endCall();
-        break;
-    }
-  };
+      switch (data.type) {
+        case "match":
+          setupWebRTC(true);
+          break;
+        case "offer":
+          await setupWebRTC(false);
+          await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+          const answer = await peerConnection.createAnswer();
+          await peerConnection.setLocalDescription(answer);
+          ws.send(JSON.stringify({ type: "answer", answer }));
+          break;
+        case "answer":
+          await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+          break;
+        case "candidate":
+          if (peerConnection) {
+            peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+          }
+          break;
+        case "leave":
+          endCall();
+          break;
+      }
+    };
+  });
 }
 
-async function setupWebRTC(initiator = true) {
+async function setupWebRTC(initiator) {
   isCaller = initiator;
-  localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-  document.getElementById("localVideo").srcObject = localStream;
-
   remoteStream = new MediaStream();
   document.getElementById("remoteVideo").srcObject = remoteStream;
 
@@ -80,19 +79,6 @@ async function setupWebRTC(initiator = true) {
     const offer = await peerConnection.createOffer();
     await peerConnection.setLocalDescription(offer);
     ws.send(JSON.stringify({ type: "offer", offer }));
-  }
-}
-
-function sendMessage() {
-  const input = document.getElementById("chatInput");
-  const message = input.value;
-  if (message.trim() !== "") {
-    const chatBox = document.getElementById("chatBox");
-    const msgElement = document.createElement("div");
-    msgElement.textContent = `You: ${message}`;
-    chatBox.appendChild(msgElement);
-    input.value = "";
-    chatBox.scrollTop = chatBox.scrollHeight;
   }
 }
 
