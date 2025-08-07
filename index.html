@@ -2,45 +2,45 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Omengles - Random Video Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Omengles</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header>
-    <h1>Omengles</h1>
-    <p>Connect instantly with strangers worldwide</p>
-  </header>
-
-  <main>
-    <div class="video-container">
-      <video id="localVideo" autoplay muted playsinline></video>
-      <video id="remoteVideo" autoplay playsinline></video>
+  <div class="container">
+    <div class="logo">
+      <span class="logo-circle">O</span>
+      <span class="logo-text">OMENGLES</span><span class="com">COM</span>
     </div>
 
-    <div class="controls">
-      <button id="startBtn">Start Chat</button>
-      <button id="stopBtn" disabled>Stop Chat</button>
+    <h2 class="main-text">Ready to Meet<br />Someone New?</h2>
+
+    <button class="start-btn">Start</button>
+
+    <div class="how-it-works">
+      <h3>How It Works</h3>
+      <div class="steps">
+        <div class="step">
+          <div class="icon">📡</div>
+          <p>Connect</p>
+        </div>
+        <div class="step">
+          <div class="icon">🎥</div>
+          <p>Chat</p>
+        </div>
+        <div class="step">
+          <div class="icon">🔁</div>
+          <p>Repeat</p>
+        </div>
+      </div>
     </div>
 
-    <div class="chat-container">
-      <div id="chatBox"></div>
-      <input type="text" id="chatInput" placeholder="Type a message...">
-      <button id="sendBtn">Send</button>
-    </div>
+    <p class="disclaimer">
+      ⚠️ By using the service, you agree to abide by our terms of use.<br />
+      Keep your conversations anonymous and respectful.
+    </p>
 
-    <div class="login-container">
-      <input type="text" id="username" placeholder="Enter a username">
-      <button id="loginBtn">Login</button>
-    </div>
-  </main>
-
-  <footer>
-    <p>&copy; 2025 Omengles. All rights reserved.</p>
-  </footer>
-
-  <script src="script.js"></script>
+    <p class="online">✅ <span id="online-count">212</span> people online now</p>
+  </div>
 </body>
 </html>
-
-}
