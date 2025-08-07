@@ -31,14 +31,20 @@
 
     <div class="controls">
       <button id="nextBtn">Next</button>
-      <button id="stopBtn">Stop</button>
+      <button id="stopBtn" onclick="window.location.href='index.html'">End Chat</button>
     </div>
   </main>
 
   <footer>
-    <p>&copy; 2025 Omengles. All rights reserved.</p>
+    <p>&copy; 2000 Omengles. All rights reserved.</p>
   </footer>
 
+  <script>
+    // Redirect to homepage if user refreshes the page
+    window.addEventListener('beforeunload', function () {
+      window.location.href = 'index.html';
+    });
+  </script>
   <script src="script.js"></script>
 </body>
 </html>
