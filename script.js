@@ -87,9 +87,70 @@ function endCall() {
     peerConnection.close();
     peerConnection = null;
   }
+
   if (remoteStream) {
     remoteStream.getTracks().forEach(track => track.stop());
+    remoteStream = null;
   }
+
+  if (localStream) {
+    localStream.getTracks().forEach(track => track.stop());
+    localStream = null;
+  }
+
   document.getElementById("remoteVideo").srcObject = null;
-  alert("Partner has left the chat.");
+  document.getElementById("localVideo").srcObject = null;
+}
+
+function nextChat() {
+  if (ws) {
+    ws.send(JSON.stringify({ type: "leave" }));
+  }
+  endCall();
+  rejoin();
+}
+
+function rejoin() {
+  navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
+    localStream = stream;
+    document.getElementById("localVideo").srcObject = stream;
+
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: "join" }));
+    } else {
+      ws = new WebSocket("ws://localhost:3000");
+
+      ws.onopen = () => {
+        ws.send(JSON.stringify({ type: "join" }));
+      };
+
+      ws.onmessage = async (msg) => {
+        const data = JSON.parse(msg.data);
+
+        switch (data.type) {
+          case "match":
+            setupWebRTC(true);
+            break;
+          case "offer":
+            await setupWebRTC(false);
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+            ws.send(JSON.stringify({ type: "answer", answer }));
+            break;
+          case "answer":
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+            break;
+          case "candidate":
+            if (peerConnection) {
+              peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+            }
+            break;
+          case "leave":
+            endCall();
+            break;
+        }
+      };
+    }
+  });
 }
