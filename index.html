@@ -46,7 +46,10 @@
   <div id="chat-interface" class="hidden">
     <video id="localVideo" autoplay muted playsinline></video>
     <video id="remoteVideo" autoplay playsinline></video>
-    <button onclick="endCall()">End Chat</button>
+    <div class="chat-controls">
+      <button onclick="nextChat()">Next</button>
+      <button onclick="endCall()">End Chat</button>
+    </div>
   </div>
 
   <script src="script.js"></script>
