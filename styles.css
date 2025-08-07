@@ -90,6 +90,7 @@ body {
   margin-top: 1em;
   font-weight: bold;
 }
+
 .hidden {
   display: none;
 }
@@ -104,4 +105,19 @@ video {
   margin: 10px;
   border: 2px solid #fff;
   border-radius: 10px;
+}
+
+.chat-controls {
+  margin-top: 1em;
+}
+
+.chat-controls button {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  margin: 0 0.5em;
+  border-radius: 8px;
+  cursor: pointer;
 }
