@@ -90,3 +90,18 @@ body {
   margin-top: 1em;
   font-weight: bold;
 }
+.hidden {
+  display: none;
+}
+
+#chat-interface {
+  text-align: center;
+  padding: 1em;
+}
+
+video {
+  width: 45%;
+  margin: 10px;
+  border: 2px solid #fff;
+  border-radius: 10px;
+}
